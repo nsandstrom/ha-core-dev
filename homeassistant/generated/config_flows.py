@@ -408,6 +408,7 @@ FLOWS = {
         "nmap_tracker",
         "nobo_hub",
         "notion",
+        "nsalab",
         "nuheat",
         "nuki",
         "nut",
