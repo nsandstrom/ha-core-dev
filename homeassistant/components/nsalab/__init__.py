@@ -8,7 +8,6 @@ from homeassistant.core import HomeAssistant
 
 from . import hub
 
-
 # TODO List the platforms that you want to support.
 # For your initial PR, limit it to 1 platform.
 PLATFORMS: list[Platform] = [Platform.SENSOR]

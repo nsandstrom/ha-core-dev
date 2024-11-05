@@ -11,7 +11,7 @@ import random
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import LIGHT_LUX, PERCENTAGE
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import HubConfigEntry
@@ -31,8 +31,8 @@ async def async_setup_entry(
     hub = config_entry.runtime_data
 
     new_devices = []
-    new_devices.append(BatterySensor(hub.ups))
-    new_devices.append(IlluminanceSensor(hub.ups))
+    new_devices.append(BatterySensor(hub.roller))
+    new_devices.append(IlluminanceSensor(hub.roller))
 
     # for roller in hub.rollers:
     #     new_devices.append(BatterySensor(roller))
@@ -60,8 +60,9 @@ class SensorBase(Entity):
     # as name. If name is returned, this entity will then also become a device in the
     # HA UI.
     @property
-    def device_info(self):
+    def device_info(self) -> DeviceInfo:
         """Return information to link this entity with the correct device."""
+        print("🦕 Logging stuff 4!, Sensor device_info", self)
         return {
             "identifiers": {(DOMAIN, self._roller.roller_id)},
             # If desired, the name for the device could be different to the entity
