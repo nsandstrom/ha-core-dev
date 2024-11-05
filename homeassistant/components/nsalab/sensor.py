@@ -47,8 +47,6 @@ async def async_setup_entry(
 class SensorBase(Entity):
     """Base representation of a Hello World Sensor."""
 
-    should_poll = False
-
     def __init__(self, roller):
         """Initialize the sensor."""
         self._roller = roller
