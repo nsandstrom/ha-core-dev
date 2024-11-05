@@ -31,8 +31,8 @@ async def async_setup_entry(
     hub = config_entry.runtime_data
 
     new_devices = []
-    new_devices.append(BatterySensor(hub.roller))
-    new_devices.append(IlluminanceSensor(hub.roller))
+    new_devices.append(BatterySensor(hub))
+    new_devices.append(IlluminanceSensor(hub))
 
     # for roller in hub.rollers:
     #     new_devices.append(BatterySensor(roller))
@@ -47,9 +47,9 @@ async def async_setup_entry(
 class SensorBase(Entity):
     """Base representation of a Hello World Sensor."""
 
-    def __init__(self, roller):
+    def __init__(self, hub) -> None:
         """Initialize the sensor."""
-        self._roller = roller
+        self._hub = hub
 
         # Some static information about this device
         self.firmware_version = f"0.0.{random.randint(1, 9)}"
@@ -64,12 +64,12 @@ class SensorBase(Entity):
         """Return information to link this entity with the correct device."""
         print("🦕 Logging stuff 4!, Sensor device_info", self)
         return {
-            "identifiers": {(DOMAIN, self._roller.roller_id)},
+            "identifiers": {(DOMAIN, self._hub.hub_id)},
             # If desired, the name for the device could be different to the entity
-            "name": self.name,
-            "sw_version": self._roller.firmware_version,
-            "model": self._roller.model,
-            "manufacturer": self._roller.hub.manufacturer,
+            "name": self._hub.name,
+            "sw_version": self._hub.firmware_version,
+            "model": self._hub.model,
+            "manufacturer": self._hub.manufacturer,
         }
         # return {"identifiers": {(DOMAIN, self._roller.roller_id)}}
 
@@ -78,17 +78,17 @@ class SensorBase(Entity):
     @property
     def available(self) -> bool:
         """Return True if roller and hub is available."""
-        return self._roller.online and self._roller.hub.online
+        return self._hub.online and self._hub.online
 
-    async def async_added_to_hass(self):
-        """Run when this Entity has been added to HA."""
-        # Sensors should also register callbacks to HA when their state changes
-        self._roller.register_callback(self.async_write_ha_state)
+    # async def async_added_to_hass(self):
+    #     """Run when this Entity has been added to HA."""
+    #     # Sensors should also register callbacks to HA when their state changes
+    #     self._roller.register_callback(self.async_write_ha_state)
 
-    async def async_will_remove_from_hass(self):
-        """Entity being removed from hass."""
-        # The opposite of async_added_to_hass. Remove any registered call backs here.
-        self._roller.remove_callback(self.async_write_ha_state)
+    # async def async_will_remove_from_hass(self):
+    #     """Entity being removed from hass."""
+    #     # The opposite of async_added_to_hass. Remove any registered call backs here.
+    #     self._roller.remove_callback(self.async_write_ha_state)
 
 
 class BatterySensor(SensorBase):
@@ -105,16 +105,16 @@ class BatterySensor(SensorBase):
     # https://developers.home-assistant.io/docs/core/entity/sensor#available-device-classes
     _attr_unit_of_measurement = PERCENTAGE
 
-    def __init__(self, roller):
+    def __init__(self, roller) -> None:
         """Initialize the sensor."""
         super().__init__(roller)
 
         # As per the sensor, this must be a unique value within this domain. This is done
         # by using the device ID, and appending "_battery"
-        self._attr_unique_id = f"{self._roller.roller_id}_battery"
+        self._attr_unique_id = f"{self._hub.hub_id}_battery"
 
         # The name of the entity
-        self._attr_name = f"{self._roller.name} Battery"
+        self._attr_name = f"{self._hub.name} Battery"
 
         self._state = random.randint(0, 100)
 
@@ -123,7 +123,7 @@ class BatterySensor(SensorBase):
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self._roller.battery_level
+        return self._hub.battery_level
 
 
 # This is another sensor, but more simple compared to the battery above. See the
@@ -134,17 +134,17 @@ class IlluminanceSensor(SensorBase):
     device_class = SensorDeviceClass.ILLUMINANCE
     _attr_unit_of_measurement = LIGHT_LUX
 
-    def __init__(self, roller):
+    def __init__(self, roller) -> None:
         """Initialize the sensor."""
         super().__init__(roller)
         # As per the sensor, this must be a unique value within this domain. This is done
         # by using the device ID, and appending "_battery"
-        self._attr_unique_id = f"{self._roller.roller_id}_illuminance"
+        self._attr_unique_id = f"{self._hub.hub_id}_illuminance"
 
         # The name of the entity
-        self._attr_name = f"{self._roller.name} Illuminance"
+        self._attr_name = f"{self._hub.name} Illuminance"
 
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self._roller.illuminance
+        return self._hub.illuminance

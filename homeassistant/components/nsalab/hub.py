@@ -8,7 +8,6 @@ from __future__ import annotations
 # for more information.
 # This dummy hub always returns 3 rollers.
 import asyncio
-from collections.abc import Callable
 import datetime
 from datetime import timedelta
 import random
@@ -29,14 +28,12 @@ class Hub:
         """Init dummy hub."""
         self._host = host
         self._hass = hass
-        self._name = host
+        self.name = f"{DOMAIN}_{host}"
         self._id = host.lower()
-        self.roller = Roller(f"{DOMAIN}_{host}_UPS_ID_1", f"{host}_UPS_NAME", self)
-        # self.rollers2    = [
-        #     Roller(f"{self._id}_1", f"{self._name} 1", self),
-        #     Roller(f"{self._id}_2", f"{self._name} 2", self),
-        #     Roller(f"{self._id}_3", f"{self._name} 3", self),
-        # ]
+
+        self.firmware_version = f"0.0.{random.randint(1, 9)}"
+        self.model = "UPS Shield"
+
         self.online = True
 
     @property
@@ -49,55 +46,10 @@ class Hub:
         await asyncio.sleep(1)
         return True
 
-
-class Roller:
-    """Dummy roller (device for HA) for Hello World example."""
-
-    def __init__(self, rollerid: str, name: str, hub: Hub) -> None:
-        """Init dummy roller."""
-        print("🦕 Logging stuff 2!, Roller constructor", name)
-
-        self._id = rollerid
-        self.hub = hub
-        self.name = name
-        self._callbacks = set()
-        self._loop = asyncio.get_event_loop()
-
-        # Some static information about this device
-        self.firmware_version = f"0.0.{random.randint(1, 9)}"
-        self.model = "UPS Shield"
-
-    @property
-    def roller_id(self) -> str:
-        """Return ID for roller."""
-        return self._id
-
-    def register_callback(self, callback: Callable[[], None]) -> None:
-        """Register callback, called when Roller changes state."""
-        self._callbacks.add(callback)
-
-    def remove_callback(self, callback: Callable[[], None]) -> None:
-        """Remove previously registered callback."""
-        self._callbacks.discard(callback)
-
-    # In a real implementation, this library would call it's call backs when it was
-    # notified of any state changeds for the relevant device.
-    async def publish_updates(self) -> None:
-        """Schedule call all registered callbacks."""
-        for callback in self._callbacks:
-            callback()
-
-    @property
-    def online(self) -> float:
-        """Roller is online."""
-        # The dummy roller is offline about 10% of the time. Returns True if online,
-        # False if offline.
-        return random.random() > 0.1
-
     @property
     def battery_level(self) -> int:
         """Battery level as a percentage."""
-        print("🔋 Randomize battery capacity", datetime.datetime.now())
+        print("🔋 Randomize battery capacity IN HUB", datetime.datetime.now())
         return random.randint(0, 100)
 
     @property
