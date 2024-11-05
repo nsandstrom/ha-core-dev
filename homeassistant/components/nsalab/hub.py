@@ -15,6 +15,8 @@ from .const import DOMAIN
 
 from homeassistant.core import HomeAssistant
 
+SCAN_INTERVAL = timedelta(seconds=30)
+
 
 class Hub:
     """Dummy hub for Hello World example."""
