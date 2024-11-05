@@ -19,26 +19,28 @@ _LOGGER = logging.getLogger(__name__)
 # TODO adjust the data schema to the data that you need
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_HOST): str,
-        vol.Required(CONF_USERNAME): str,
-        vol.Required(CONF_PASSWORD): str,
+        # vol.Required(CONF_HOST): str,
+        # vol.Required(CONF_USERNAME): str,
+        # vol.Required(CONF_PASSWORD): str,
+        vol.Optional("bus", default=12): int,
+        vol.Optional("address", default="0x36"): str,
     }
 )
 
 
-class PlaceholderHub:
-    """Placeholder class to make tests pass.
+# class PlaceholderHub:
+#     """Placeholder class to make tests pass.
 
-    TODO Remove this placeholder class and replace with things from your PyPI package.
-    """
+#     TODO Remove this placeholder class and replace with things from your PyPI package.
+#     """
 
-    def __init__(self, host: str) -> None:
-        """Initialize."""
-        self.host = host
+#     def __init__(self, host: str) -> None:
+#         """Initialize."""
+#         self.host = host
 
-    async def authenticate(self, username: str, password: str) -> bool:
-        """Test if we can authenticate with the host."""
-        return True
+#     async def authenticate(self, username: str, password: str) -> bool:
+#         """Test if we can authenticate with the host."""
+#         return True
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
@@ -46,25 +48,20 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
-    # TODO validate the data can be used to set up a connection.
 
-    # If your PyPI package is not built with async, pass your methods
-    # to the executor:
-    # await hass.async_add_executor_job(
-    #     your_validate_func, data[CONF_USERNAME], data[CONF_PASSWORD]
-    # )
+    try:
+        parsed = int(data["address"], 16)
+    except ValueError:
+        raise AddressIsNotHex from None
 
-    hub = PlaceholderHub(data[CONF_HOST])
+    print("⭐️", parsed)
+    if parsed < 0 or parsed > 128:
+        raise AddressOutOfBounds from None
 
-    if not await hub.authenticate(data[CONF_USERNAME], data[CONF_PASSWORD]):
-        raise InvalidAuth
-
-    # If you cannot connect:
-    # throw CannotConnect
-    # If the authentication is wrong:
-    # InvalidAuth
+    # TODO validate if address do not start with 0x
 
     # Return info that you want to store in the config entry.
+    print("🍌 First in conf chain", data)
     return {"title": "Name of the device"}
 
 
@@ -86,10 +83,13 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 info = await validate_input(self.hass, user_input)
+                print("🍎 This is where we have info", info, user_input)
             except CannotConnect:
                 errors["base"] = "cannot_connect"
-            except InvalidAuth:
-                errors["base"] = "invalid_auth"
+            except AddressIsNotHex:
+                errors["base"] = "address_not_hex"
+            except AddressOutOfBounds:
+                errors["base"] = "Address should be between 0x00 and 0x80"
             except Exception:
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
@@ -105,5 +105,9 @@ class CannotConnect(HomeAssistantError):
     """Error to indicate we cannot connect."""
 
 
-class InvalidAuth(HomeAssistantError):
-    """Error to indicate there is invalid auth."""
+class AddressIsNotHex(HomeAssistantError):
+    """Error to indicate that address is not a hex number."""
+
+
+class AddressOutOfBounds(HomeAssistantError):
+    """Error to indicate that address is to large or small."""

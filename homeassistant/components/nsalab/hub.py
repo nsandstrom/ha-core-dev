@@ -24,12 +24,12 @@ class Hub:
 
     manufacturer = "Demonstration Corp"
 
-    def __init__(self, hass: HomeAssistant, host: str) -> None:
+    def __init__(self, hass: HomeAssistant, bus: int, address: str) -> None:
         """Init dummy hub."""
-        self._host = host
+        # self._host = host
         self._hass = hass
-        self.name = f"{DOMAIN}_{host}"
-        self._id = host.lower()
+        self.name = "UPS HAT"
+        self._id = DOMAIN
 
         self.firmware_version = f"0.0.{random.randint(1, 9)}"
         self.model = "UPS Shield"

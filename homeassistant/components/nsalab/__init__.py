@@ -28,7 +28,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry) -> bool:
     # TODO 3. Store an API object for your platforms to access
     # entry.runtime_data = MyAPI(...)
 
-    entry.runtime_data = hub.Hub(hass, entry.data["host"])
+    print("🍅 Is this config entry?", entry.data)
+
+    entry.runtime_data = hub.Hub(hass, entry.data["bus"], entry.data["address"])
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
