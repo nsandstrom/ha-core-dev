@@ -8,15 +8,15 @@ from __future__ import annotations
 # for more information.
 # This dummy hub always returns 3 rollers.
 import asyncio
-import datetime
 from datetime import timedelta
 import random
 
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
+from .const import DOMAIN, POLL_TIME
+from .x1200_fake import X1200
 
-SCAN_INTERVAL = timedelta(seconds=30)
+SCAN_INTERVAL = timedelta(seconds=POLL_TIME)
 
 
 class Hub:
@@ -31,8 +31,9 @@ class Hub:
         self.name = "UPS HAT"
         self._id = DOMAIN
 
-        self.firmware_version = f"0.0.{random.randint(1, 9)}"
         self.model = "UPS Shield"
+
+        self.x1200 = X1200()
 
         self.online = True
 
@@ -49,13 +50,12 @@ class Hub:
     @property
     def battery_level(self) -> int:
         """Battery level as a percentage."""
-        print("🔋 Randomize battery capacity IN HUB", datetime.datetime.now())
-        return random.randint(0, 100)
+        return self.x1200.battery_level
 
     @property
     def battery_voltage(self) -> float:
         """Return a random voltage roughly that of a 12v battery."""
-        return round(random.random() * 3 + 10, 2)
+        return self.x1200.battery_voltage
 
     @property
     def illuminance(self) -> int:
