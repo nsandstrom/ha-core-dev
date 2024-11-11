@@ -33,7 +33,7 @@ class Hub:
 
         self.model = "UPS Shield"
 
-        self.x1200 = X1200()
+        self.x1200 = X1200(bus, address)
 
         self.online = True
 

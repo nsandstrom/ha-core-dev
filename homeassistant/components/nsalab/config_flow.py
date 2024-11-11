@@ -8,39 +8,21 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
 from .const import DOMAIN
+from .x1200_fake import test_connectivity
 
 _LOGGER = logging.getLogger(__name__)
 
 # TODO adjust the data schema to the data that you need
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
-        # vol.Required(CONF_HOST): str,
-        # vol.Required(CONF_USERNAME): str,
-        # vol.Required(CONF_PASSWORD): str,
-        vol.Optional("bus", default=12): int,
+        vol.Optional("bus", default=1): int,
         vol.Optional("address", default="0x36"): str,
     }
 )
-
-
-# class PlaceholderHub:
-#     """Placeholder class to make tests pass.
-
-#     TODO Remove this placeholder class and replace with things from your PyPI package.
-#     """
-
-#     def __init__(self, host: str) -> None:
-#         """Initialize."""
-#         self.host = host
-
-#     async def authenticate(self, username: str, password: str) -> bool:
-#         """Test if we can authenticate with the host."""
-#         return True
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
@@ -48,17 +30,21 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
+    if not data["address"].startswith("0x"):
+        raise AddressIsNotHex from None
 
     try:
         parsed = int(data["address"], 16)
     except ValueError:
         raise AddressIsNotHex from None
 
-    print("⭐️", parsed)
     if parsed < 0 or parsed > 128:
         raise AddressOutOfBounds from None
 
-    # TODO validate if address do not start with 0x
+    try:
+        make_test_connection(data["bus"], data["address"])
+    except Exception as error:
+        raise I2cCannotConnect from error
 
     # Return info that you want to store in the config entry.
     print("🍌 First in conf chain", data)
@@ -84,8 +70,10 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             try:
                 info = await validate_input(self.hass, user_input)
                 print("🍎 This is where we have info", info, user_input)
-            except CannotConnect:
-                errors["base"] = "cannot_connect"
+            except I2cCannotConnect:
+                _LOGGER.exception("🧨 X1200 could not connect")
+
+                errors["base"] = "I2C Connection failed"
             except AddressIsNotHex:
                 errors["base"] = "address_not_hex"
             except AddressOutOfBounds:
@@ -101,8 +89,12 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
 
-class CannotConnect(HomeAssistantError):
-    """Error to indicate we cannot connect."""
+def make_test_connection(bus: int, address: str):
+    """Test connectivity using values from config flow."""
+    connect_status = test_connectivity(bus, address)
+    print("🍌 Connect status", connect_status)
+    if not connect_status:
+        raise UnexpectedConnectivityResult() from None
 
 
 class AddressIsNotHex(HomeAssistantError):
@@ -111,3 +103,11 @@ class AddressIsNotHex(HomeAssistantError):
 
 class AddressOutOfBounds(HomeAssistantError):
     """Error to indicate that address is to large or small."""
+
+
+class UnexpectedConnectivityResult(Exception):
+    """Connectivity test returned something we did not exect."""
+
+
+class I2cCannotConnect(ConnectionError):
+    """Error to indicate we cannot connect."""
