@@ -12,7 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
 from .const import DOMAIN
-from .x1200_fake import test_connectivity
+from .hub import Hub
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -69,7 +69,6 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 info = await validate_input(self.hass, user_input)
-                print("🍎 This is where we have info", info, user_input)
             except I2cCannotConnect:
                 _LOGGER.exception("🧨 X1200 could not connect")
 
@@ -91,7 +90,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
 
 def make_test_connection(bus: int, address: str):
     """Test connectivity using values from config flow."""
-    connect_status = test_connectivity(bus, address)
+    connect_status = Hub.test_connection(bus, address)
     print("🍌 Connect status", connect_status)
     if not connect_status:
         raise UnexpectedConnectivityResult() from None

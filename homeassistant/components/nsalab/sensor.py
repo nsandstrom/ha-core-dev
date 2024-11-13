@@ -60,7 +60,7 @@ class SensorBase(Entity):
     @property
     def available(self) -> bool:
         """Return True if roller and hub is available."""
-        return self._hub.online and self._hub.online
+        return self._hub.online
 
 
 class BatterySensor(SensorBase):

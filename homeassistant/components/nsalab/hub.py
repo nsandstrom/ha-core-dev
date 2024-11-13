@@ -6,8 +6,6 @@ from __future__ import annotations
 # The PyPI package needs to be included in the `requirements` section of manifest.json
 # See https://developers.home-assistant.io/docs/creating_integration_manifest
 # for more information.
-# This dummy hub always returns 3 rollers.
-import asyncio
 from datetime import timedelta
 import random
 
@@ -22,7 +20,7 @@ SCAN_INTERVAL = timedelta(seconds=POLL_TIME)
 class Hub:
     """Dummy hub for Hello World example."""
 
-    manufacturer = "Demonstration Corp"
+    manufacturer = "Geekworm"
 
     def __init__(self, hass: HomeAssistant, bus: int, address: str) -> None:
         """Init dummy hub."""
@@ -31,7 +29,7 @@ class Hub:
         self.name = "UPS HAT"
         self._id = DOMAIN
 
-        self.model = "UPS Shield"
+        self.model = "X1200 UPS Shield"
 
         self.x1200 = X1200(bus, address)
 
@@ -42,10 +40,10 @@ class Hub:
         """ID for dummy hub."""
         return self._id
 
-    async def test_connection(self) -> bool:
+    @staticmethod
+    def test_connection(i2c_bus: int, i2c_address: str) -> bool:
         """Test connectivity to the Dummy hub is OK."""
-        await asyncio.sleep(1)
-        return True
+        return X1200.test_connection(i2c_bus, i2c_address)
 
     @property
     def battery_level(self) -> int:
