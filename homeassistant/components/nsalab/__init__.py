@@ -30,7 +30,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: HubConfigEntry) -> bool:
 
     print("🍅 Is this config entry?", entry.data)
 
-    entry.runtime_data = hub.Hub(hass, entry.data["bus"], entry.data["address"])
+    integer_address = int(entry.data["address"], 16)
+
+    entry.runtime_data = hub.Hub(hass, entry.data["bus"], integer_address)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 

@@ -22,7 +22,7 @@ class Hub:
 
     manufacturer = "Geekworm"
 
-    def __init__(self, hass: HomeAssistant, bus: int, address: str) -> None:
+    def __init__(self, hass: HomeAssistant, bus: int, address: int) -> None:
         """Init dummy hub."""
         # self._host = host
         self._hass = hass
@@ -41,7 +41,7 @@ class Hub:
         return self._id
 
     @staticmethod
-    def test_connection(i2c_bus: int, i2c_address: str) -> bool:
+    def test_connection(i2c_bus: int, i2c_address: int) -> bool:
         """Test connectivity to the Dummy hub is OK."""
         return X1200.test_connection(i2c_bus, i2c_address)
 

@@ -41,8 +41,9 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     if parsed < 0 or parsed > 128:
         raise AddressOutOfBounds from None
 
+    integer_address = int(data["address"], 16)
     try:
-        make_test_connection(data["bus"], data["address"])
+        make_test_connection(data["bus"], integer_address)
     except Exception as error:
         raise I2cCannotConnect from error
 
@@ -88,7 +89,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
 
-def make_test_connection(bus: int, address: str):
+def make_test_connection(bus: int, address: int):
     """Test connectivity using values from config flow."""
     connect_status = Hub.test_connection(bus, address)
     print("🍌 Connect status", connect_status)

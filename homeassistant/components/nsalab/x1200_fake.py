@@ -9,7 +9,7 @@ from .x1200 import BaseUpsHat
 class X1200(BaseUpsHat):
     """A mocked implementation of the x1200."""
 
-    def __init__(self, i2c_bus: int, i2c_address: str) -> None:
+    def __init__(self, i2c_bus: int, i2c_address: int) -> None:
         """Create a mocked x1200."""
         super().__init__(i2c_bus, i2c_address)
 
@@ -17,8 +17,8 @@ class X1200(BaseUpsHat):
         print("🔌 Connect fake SMBUS", i2c_bus)
 
     def _read_level(self):
-        if self._i2c_address == "0x66":
-            raise MockedSMbusError("This is a test error") from None
+        if self._i2c_address == int("0x66", 16):
+            raise MockedSMbusError("Fake sensor always fails on address 0x66") from None
         return random.randint(0, 100)
 
     @property
