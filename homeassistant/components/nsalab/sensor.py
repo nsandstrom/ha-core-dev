@@ -26,9 +26,6 @@ async def async_setup_entry(
         async_add_entities(new_devices)
 
 
-# This base class shows the common properties and methods for a sensor as used in this
-# example. See each sensor for further details about properties and methods that
-# have been overridden.
 class SensorBase(Entity):
     """Base representation of a Hello World Sensor."""
 
@@ -36,35 +33,26 @@ class SensorBase(Entity):
         """Initialize the sensor."""
         self._hub = hub
 
-        # self.firmware_version = f"0.0.{random.randint(1, 9)}"
         self.model = "Test Device"
 
-    # To link this entity to the cover device, this property must return an
-    # identifiers value matching that used in the cover, but no other information such
-    # as name. If name is returned, this entity will then also become a device in the
-    # HA UI.
     @property
     def device_info(self) -> DeviceInfo:
         """Return information to link this entity with the correct device."""
         return {
             "identifiers": {(DOMAIN, self._hub.hub_id)},
-            # If desired, the name for the device could be different to the entity
             "name": self._hub.name,
-            # "sw_version": self._hub.firmware_version,
             "model": self._hub.model,
             "manufacturer": self._hub.manufacturer,
         }
 
-    # This property is important to let HA know if this entity is online or not.
-    # If an entity is offline (return False), the UI will refelect this.
     @property
     def available(self) -> bool:
-        """Return True if roller and hub is available."""
+        """Return True if ups is online."""
         return self._hub.online
 
 
 class BatterySensor(SensorBase):
-    """Representation of a Sensor."""
+    """Representation of a Battery Sensor."""
 
     device_class = SensorDeviceClass.BATTERY
     _attr_unit_of_measurement = PERCENTAGE
@@ -84,7 +72,7 @@ class BatterySensor(SensorBase):
 
 
 class VoltageSensor(SensorBase):
-    """Representation of a Sensor."""
+    """Representation of a Voltage Sensor."""
 
     device_class = SensorDeviceClass.VOLTAGE
     _attr_unit_of_measurement = "V"

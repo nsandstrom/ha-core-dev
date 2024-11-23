@@ -1,4 +1,4 @@
-"""Config flow for nsalab-test integration."""
+"""Config flow for integration."""
 
 from __future__ import annotations
 
@@ -16,44 +16,41 @@ from .hub import Hub
 
 _LOGGER = logging.getLogger(__name__)
 
-# TODO adjust the data schema to the data that you need
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
-        vol.Optional("bus", default=1): int,
-        vol.Optional("address", default="0x36"): str,
+        vol.Optional("i2c_bus", default=1): int,
+        vol.Optional("i2c_address", default="0x36"): str,
+        vol.Optional("gpoi_chip", default=4): vol.In([0, 4]),
+        vol.Optional("pld_pin", default=6): int,
     }
 )
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to connect.
+    """Validate the user input allows us to connect."""
 
-    Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
-    """
-    if not data["address"].startswith("0x"):
+    if not data["i2c_address"].startswith("0x"):
         raise AddressIsNotHex from None
 
     try:
-        parsed = int(data["address"], 16)
+        parsed = int(data["i2c_address"], 16)
     except ValueError:
         raise AddressIsNotHex from None
 
     if parsed < 0 or parsed > 128:
         raise AddressOutOfBounds from None
 
-    integer_address = int(data["address"], 16)
+    integer_address = int(data["i2c_address"], 16)
     try:
-        make_test_connection(data["bus"], integer_address)
+        make_test_connection(data["i2c_bus"], integer_address)
     except Exception as error:
         raise I2cCannotConnect from error
 
-    # Return info that you want to store in the config entry.
-    print("🍌 First in conf chain", data)
-    return {"title": "Name of the device"}
+    return {"title": "X1200 UPS"}
 
 
 class ConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for nsalab-test."""
+    """Handle a config flow."""
 
     VERSION = 1
 
@@ -92,9 +89,8 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
 def make_test_connection(bus: int, address: int):
     """Test connectivity using values from config flow."""
     connect_status = Hub.test_connection(bus, address)
-    print("🍌 Connect status", connect_status)
     if not connect_status:
-        raise UnexpectedConnectivityResult() from None
+        raise UnexpectedConnectivityResult from None
 
 
 class AddressIsNotHex(HomeAssistantError):

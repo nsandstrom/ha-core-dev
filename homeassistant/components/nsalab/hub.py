@@ -1,13 +1,8 @@
-"""A demonstration 'hub' that connects several devices."""
+"""A simple abstraction hub."""
 
 from __future__ import annotations
 
-# In a real implementation, this would be in an external library that's on PyPI.
-# The PyPI package needs to be included in the `requirements` section of manifest.json
-# See https://developers.home-assistant.io/docs/creating_integration_manifest
-# for more information.
 from datetime import timedelta
-import random
 
 from homeassistant.core import HomeAssistant
 
@@ -18,31 +13,37 @@ SCAN_INTERVAL = timedelta(seconds=POLL_TIME)
 
 
 class Hub:
-    """Dummy hub for Hello World example."""
+    """Abstraction hub."""
 
     manufacturer = "Geekworm"
 
-    def __init__(self, hass: HomeAssistant, bus: int, address: int) -> None:
-        """Init dummy hub."""
-        # self._host = host
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        i2c_bus: int,
+        i2c_address: int,
+        gpoi_chip: int,
+        pld_pin: int,
+    ) -> None:
+        """Init hub."""
         self._hass = hass
-        self.name = "UPS HAT"
+        self.name = "X1200 UPS"
         self._id = DOMAIN
 
         self.model = "X1200 UPS Shield"
 
-        self.x1200 = X1200(bus, address)
+        self.x1200 = X1200(i2c_bus, i2c_address, gpoi_chip, pld_pin)
 
         self.online = True
 
     @property
     def hub_id(self) -> str:
-        """ID for dummy hub."""
+        """ID for hub."""
         return self._id
 
     @staticmethod
     def test_connection(i2c_bus: int, i2c_address: int) -> bool:
-        """Test connectivity to the Dummy hub is OK."""
+        """Test connectivity to the UPS module."""
         return X1200.test_connection(i2c_bus, i2c_address)
 
     @property
@@ -52,10 +53,10 @@ class Hub:
 
     @property
     def battery_voltage(self) -> float:
-        """Return a random voltage roughly that of a 12v battery."""
+        """Battery voltage."""
         return self.x1200.battery_voltage
 
     @property
-    def illuminance(self) -> int:
-        """Return a sample illuminance in lux."""
-        return random.randint(0, 500)
+    def external_power_connected(self) -> bool:
+        """If external power is pluged in."""
+        return self.x1200.external_power_detected

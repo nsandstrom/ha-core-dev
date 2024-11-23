@@ -2,10 +2,12 @@
   "config": {
     "step": {
       "user": {
+        "description": "Default values should match the X1200 UPS (on HAOS 13.2)",
         "data": {
-          "host": "[%key:common::config_flow::data::host%]",
-          "username": "[%key:common::config_flow::data::username%]",
-          "password": "[%key:common::config_flow::data::password%]"
+          "pld_pin": "PLD gpio pin (charger detection)",
+          "i2c_bus": "I²C bus",
+          "i2c_address": "I²C address",
+          "gpoi_chip": "GPIO Chip.\n(0 when kernel release 6.6.45 or newer is used)"
         }
       }
     },
